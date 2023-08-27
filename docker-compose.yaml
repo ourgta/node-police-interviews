@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  node-police-interviews:
+    container_name: node-police-interviews
+    environment:
+      - "BLACKLIST=${BLACKLIST}"
+      - "TIMEOUT=10"
+    image: node-police-interviews
+    restart: unless-stopped
+    volumes:
+      - "./config.json:/config.json"

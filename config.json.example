@@ -1,0 +1,11 @@
+[
+  {
+    "serverId": 0,
+    "channels": [
+      {
+        "id": 0,
+        "webhooks": [""]
+      }
+    ]
+  }
+]

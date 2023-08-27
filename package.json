@@ -1,0 +1,26 @@
+{
+  "name": "node-police-interviews",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "prettier": "3.x",
+    "prettier-plugin-jsdoc": "1.x"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-jsdoc"
+    ]
+  },
+  "dependencies": {
+    "discord.js": "^14.13.0",
+    "jsdom": "^22.1.0"
+  }
+}
