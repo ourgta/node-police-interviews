@@ -4,14 +4,14 @@ import { readFileSync } from "fs";
 import { JSDOM } from "jsdom";
 import { WebhookClient } from "discord.js";
 
-/** @typedef {{ id: number; webhooks: string[] }} Channel */
+/** @typedef {{ id: number; webhooks: string[] }} ConfigChannel */
 
-/** @type {Map<number, Channel[]>} */
+/** @type {Map<number, ConfigChannel[]>} */
 const serverChannels = new Map();
 for (const {
   serverId,
   channels,
-} of /** @type {{ serverId: number; channels: Channel[] }[]} */ (
+} of /** @type {{ serverId: number; channels: ConfigChannel[] }[]} */ (
   JSON.parse(readFileSync("./config.json").toString())
 )) {
   serverChannels.set(serverId, channels);
@@ -20,7 +20,9 @@ for (const {
 const blacklist = (process.env.BLACKLIST || "").split(",");
 
 /**
- * @typedef {Map<number, Map<number, string[]>>} Server
+ * @typedef {Map<number, string[]>} ServerChannel
+ *
+ * @typedef {Map<number, ServerChannel>} Server
  * @type {Server}
  */
 let serverChannelClients = new Map();
@@ -48,7 +50,7 @@ async function main() {
 
     let html = "";
     for (const line of (await response.text()).split("\n")) {
-      const prefix = `TSV.ViewerScript.Data[${server}]['html'] = `;
+      const prefix = `TSV.ViewerScript.Data[${server}]['html'] = '`;
       if (!line.startsWith(prefix)) continue;
       line.slice(prefix.length);
 
@@ -56,14 +58,14 @@ async function main() {
       if (!line.endsWith(suffix)) continue;
       line.slice(undefined, -suffix.length);
 
-      html = "line".split('\\"').join('"');
+      html = line.split('\\"').join('"');
     }
 
     if (!html) continue;
 
-    for (const element of new JSDOM(
-      await response.arrayBuffer(),
-    ).window.document.querySelectorAll("div.tsv_user")) {
+    for (const element of new JSDOM(html).window.document.querySelectorAll(
+      "div.tsv_user",
+    )) {
       if (
         blacklist.includes(
           element.getAttribute("data-client_unique_identifier") || "",
@@ -88,7 +90,14 @@ async function main() {
 
         if (firstInterval) continue;
 
-        if (serverChannelClients.get(server)?.get(channelId)?.includes(name))
+        if (
+          (
+            (
+              serverChannelClients.get(server) ||
+              /** @type {ServerChannel} */ (new Map())
+            ).get(channelId) || []
+          ).includes(name)
+        )
           continue;
 
         for (const webhook of channel.webhooks) {
